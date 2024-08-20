@@ -1,3 +1,4 @@
+import 'package:auth/screens/user_info_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -5,9 +6,36 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class Authentication {
-  static Future<FirebaseApp> initializeFirebase() async {
+  static SnackBar customSnackBar({required String content}) {
+    return SnackBar(
+      backgroundColor: Colors.black,
+      content: Text(
+        content,
+        style: const TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
+      ),
+    );
+  }
+
+  static Future<FirebaseApp> initializeFirebase(BuildContext context) async {
     FirebaseApp firebaseApp = await Firebase.initializeApp();
-    // TODO: Add auto login logic
+    print("🔥 ~ Authentication ~ initializeFirebase : $firebaseApp");
+
+    User? user = FirebaseAuth.instance.currentUser;
+
+    print("🔥 ~ Authentication ~ User : $user");
+
+    if (user != null) {
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => UserInfoScreen(
+              user: user,
+            ),
+          ),
+        );
+      }
+    }
+
     return firebaseApp;
   }
 
@@ -65,16 +93,6 @@ class Authentication {
       }
     }
     return user;
-  }
-
-  static SnackBar customSnackBar({required String content}) {
-    return SnackBar(
-      backgroundColor: Colors.black,
-      content: Text(
-        content,
-        style: const TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
-      ),
-    );
   }
 
   static Future<void> signOut({required BuildContext context}) async {
